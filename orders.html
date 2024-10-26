@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Management - Rameshwaram Cafe</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        .card {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 flex flex-col md:flex-row">
+    <aside class="w-full md:w-1/4 bg-blue-800 text-white p-6 h-screen shadow-lg">
+        <h2 class="text-2xl mb-6 font-bold text-center">Rameshwaram Cafe</h2>
+        <ul>
+            <li><a href="menu.html" class="flex items-center py-2 hover:bg-blue-700 transition duration-200 rounded"><i
+                        class="fas fa-utensils mr-2"></i> Menu Management</a></li>
+            <li><a href="orders.html"
+                    class="flex items-center py-2 hover:bg-blue-700 transition duration-200 rounded"><i
+                        class="fas fa-receipt mr-2"></i> Order Management</a></li>
+            <li><a href="finance.html"
+                    class="flex items-center py-2 hover:bg-blue-700 transition duration-200 rounded"><i
+                        class="fas fa-chart-line mr-2"></i> Finance Dashboard</a></li>
+        </ul>
+    </aside>
+
+    <main class="flex-1 p-6">
+        <header class="bg-blue-800 text-white p-4 text-center rounded-lg shadow-md">
+            <h1 class="text-3xl font-semibold">Order Management</h1>
+        </header>
+
+        <div class="mt-6">
+            <div class="bg-white p-6 rounded-lg shadow-md card">
+                <h2 class="text-2xl mt-4 font-bold">Current Orders</h2>
+                <ul id="currentOrdersList" class="mt-4"></ul>
+            </div>
+
+            <div class="bg-white p-6 rounded-lg shadow-md card mt-6">
+                <h2 class="text-2xl mt-4 font-bold">Past Orders</h2>
+                <ul id="pastOrdersList" class="mt-4"></ul>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Sample data for current and past orders
+        let currentOrders = [
+            {
+                tableNumber: 1,
+                customerName: "John Doe",
+                items: [
+                    { name: "Coffee", quantity: 2 },
+                    { name: "Samosa", quantity: 3 }
+                ],
+                status: "Preparing"
+            },
+            {
+                tableNumber: 2,
+                customerName: "Jane Smith",
+                items: [
+                    { name: "Juice", quantity: 1 },
+                    { name: "Paneer Butter Masala", quantity: 1 }
+                ],
+                status: "Packing"
+            }
+        ];
+
+        let pastOrders = [
+            {
+                tableNumber: 3,
+                customerName: "Alice Johnson",
+                items: [
+                    { name: "Tea", quantity: 1 },
+                    { name: "Chips", quantity: 2 }
+                ],
+                status: "Served"
+            }
+        ];
+
+        // Function to render current orders
+        function renderCurrentOrders() {
+            const currentOrdersList = document.getElementById('currentOrdersList');
+            currentOrdersList.innerHTML = ''; // Clear the list
+
+            currentOrders.forEach((order, index) => {
+                const orderItems = order.items.map(item => `${item.quantity} x ${item.name}`).join(', ');
+                currentOrdersList.innerHTML += `
+                    <li class="flex justify-between items-center py-2 border-b">
+                        <div>
+                            <strong>Table ${order.tableNumber}</strong> - ${order.customerName}<br>
+                            Items: ${orderItems}<br>
+                            Status: <span class="font-bold">${order.status}</span>
+                        </div>
+                        <div>
+                            <select onchange="updateOrderStatus(${index}, this.value)" class="border p-1 rounded">
+                                <option value="Preparing" ${order.status === 'Preparing' ? 'selected' : ''}>Preparing</option>
+                                <option value="Packing" ${order.status === 'Packing' ? 'selected' : ''}>Packing</option>
+                                <option value="Ready" ${order.status === 'Ready' ? 'selected' : ''}>Ready</option>
+                                <option value="Served" ${order.status === 'Served' ? 'selected' : ''}>Served</option>
+                            </select>
+                        </div>
+                    </li>`;
+            });
+        }
+
+        // Function to render past orders
+        function renderPastOrders() {
+            const pastOrdersList = document.getElementById('pastOrdersList');
+            pastOrdersList.innerHTML = ''; // Clear the list
+
+            pastOrders.forEach(order => {
+                const orderItems = order.items.map(item => `${item.quantity} x ${item.name}`).join(', ');
+                pastOrdersList.innerHTML += `
+                    <li class="flex justify-between items-center py-2 border-b">
+                        <div>
+                            <strong>Table ${order.tableNumber}</strong> - ${order.customerName}<br>
+                            Items: ${orderItems}<br>
+                            Status: <span class="font-bold">${order.status}</span>
+                        </div>
+                    </li>`;
+            });
+        }
+
+        // Function to update order status
+        function updateOrderStatus(index, status) {
+            currentOrders[index].status = status; // Update the order status
+            renderCurrentOrders(); // Re-render the current orders
+        }
+
+        // Initial render of orders
+        renderCurrentOrders();
+        renderPastOrders();
+    </script>
+</body>
+
+</html>

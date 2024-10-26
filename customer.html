@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer - Rameshwaram Cafe</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .card {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .tab {
+            cursor: pointer;
+        }
+
+        .tab.active {
+            background-color: #3b82f6;
+            /* Tailwind blue-500 */
+            color: white;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100">
+    <header class="bg-blue-800 text-white p-4 text-center">
+        <h1 class="text-3xl font-semibold">Welcome to Rameshwaram Cafe</h1>
+    </header>
+
+    <div class="container mx-auto p-6">
+        <div class="bg-white p-6 rounded-lg shadow-md card mb-6">
+            <h3 class="text-lg font-bold mt-4">Customer Details</h3>
+            <div class="mt-4">
+                <input type="text" id="customerName" placeholder="Your Name"
+                    class="border p-2 w-full rounded mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                <input type="text" id="customerPhone" placeholder="Your Phone Number"
+                    class="border p-2 w-full rounded mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                <input type="text" id="tableNumber" placeholder="Table Number"
+                    class="border p-2 w-full rounded mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg shadow-md card mb-6">
+            <h2 class="text-2xl font-bold">Menu</h2>
+            <div class="flex flex-wrap space-x-4 mt-4">
+                <button class="tab active px-4 py-2 rounded" onclick="showCategory('beverages')">Beverages</button>
+                <button class="tab px-4 py-2 rounded" onclick="showCategory('snacks')">Snacks</button>
+                <button class="tab px-4 py-2 rounded" onclick="showCategory('mainCourse')">Main Course</button>
+            </div>
+            <ul id="menuList" class="mt-4"></ul>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg shadow-md card mb-6">
+            <h2 class="text-2xl font-bold">Your Cart</h2>
+            <ul id="cartList" class="mt-4"></ul>
+            <p class="font-bold mt-2">Total: <span id="totalPrice">₹0.00</span></p>
+            <button id="placeOrder" class="bg-blue-600 text-white px-4 py-2 rounded mt-4">Place Order</button>
+        </div>
+
+        <div id="currentOrderSection" class="bg-white p-6 rounded-lg shadow-md card hidden">
+            <h2 class="text-2xl font-bold">Current Order</h2>
+            <div id="currentOrderDetails" class="mt-4"></div>
+        </div>
+    </div>
+
+    <script>
+        // Sample menu items categorized
+        const menuItems = {
+            beverages: [
+                { name: "Coffee", price: 50 },
+                { name: "Tea", price: 30 },
+                { name: "Juice", price: 60 }
+            ],
+            snacks: [
+                { name: "Samosa", price: 20 },
+                { name: "Chips", price: 15 },
+                { name: "Spring Roll", price: 25 }
+            ],
+            mainCourse: [
+                { name: "Paneer Butter Masala", price: 150 },
+                { name: "Biryani", price: 200 }
+            ]
+        };
+
+        let cart = [];
+        let currentOrder = null; // To store the current order details
+
+        // Function to render menu items based on category
+        function renderMenu(category) {
+            const menuList = document.getElementById('menuList');
+            menuList.innerHTML = ''; // Clear previous entries
+
+            menuItems[category].forEach((item, index) => {
+                menuList.innerHTML += `
+                    <li class="flex justify-between items-center py-2 border-b">
+                        <span>${item.name} - ₹${item.price}</span>
+                        <button onclick="addToCart('${category}', ${index})" class="bg-blue-600 text-white px-2 py-1 rounded">Add to Cart</button>
+                    </li>`;
+            });
+        }
+
+        // Function to add item to cart
+        function addToCart(category, index) {
+            const item = menuItems[category][index];
+            const existingItem = cart.find(cartItem => cartItem.name === item.name);
+
+            if (existingItem) {
+                existingItem.quantity += 1; // Increase quantity if item already in cart
+            } else {
+                cart.push({ ...item, quantity: 1 }); // Add new item to cart
+            }
+            renderCart();
+        }
+
+        // Function to render cart items
+        function renderCart() {
+            const cartList = document.getElementById('cartList');
+            cartList.innerHTML = ''; // Clear previous entries
+
+            let total = 0;
+
+            cart.forEach((item, index) => {
+                const itemTotal = item.price * item.quantity;
+                total += itemTotal;
+                cartList.innerHTML += `
+                    <li class="flex justify-between items-center py-2 border-b">
+                        <span>${item.name} - ₹${item.price} x ${item.quantity}</span>
+                        <button onclick="removeFromCart(${index})" class="text-red-500">Remove</button>
+                    </li>`;
+            });
+
+            document.getElementById('totalPrice').innerText = `₹${total.toFixed(2)}`;
+        }
+
+        // Function to remove item from cart
+        function removeFromCart(index) {
+            cart.splice(index, 1); // Remove item from cart
+            renderCart();
+        }
+
+        // Function to place order
+        document.getElementById('placeOrder').addEventListener('click', function () {
+            const name = document.getElementById('customerName').value;
+            const phone = document.getElementById('customerPhone').value;
+            const table = document.getElementById('tableNumber').value;
+
+            if (cart.length === 0) {
+                alert("Your cart is empty!");
+                return;
+            }
+
+            if (!name || !phone || !table) {
+                alert("Please fill in all customer details!");
+                return;
+            }
+
+            // Store the current order details
+            currentOrder = {
+                name: name,
+                phone: phone,
+                table: table,
+                items: cart,
+                status: "Order Placed"
+            };
+
+            // Show the current order section
+            renderCurrentOrder();
+            cart = []; // Clear cart after placing order
+            renderCart(); // Update cart display
+        });
+
+        // Function to render the current order
+        function renderCurrentOrder() {
+            const currentOrderSection = document.getElementById('currentOrderSection');
+            const currentOrderDetails = document.getElementById('currentOrderDetails');
+            currentOrderDetails.innerHTML = ''; // Clear previous entries
+
+            if (currentOrder) {
+                currentOrderDetails.innerHTML += `
+                    <p><strong>Name:</strong> ${currentOrder.name}</p>
+                    <p><strong>Phone:</strong> ${currentOrder.phone}</p>
+                    <p><strong>Table:</strong> ${currentOrder.table}</p>
+                    <p><strong>Status:</strong> ${currentOrder.status}</p>
+                    <h3 class="mt-4 font-bold">Items Ordered:</h3>
+                    <ul class="mt-2">`;
+
+                currentOrder.items.forEach(item => {
+                    currentOrderDetails.innerHTML += `
+                        <li>${item.name} - ₹${item.price} x ${item.quantity}</li>`;
+                });
+
+                currentOrderDetails.innerHTML += `</ul>`;
+                currentOrderSection.classList.remove('hidden'); // Show the current order section
+            }
+        }
+
+        // Function to show selected category
+        function showCategory(category) {
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelector(`.tab[onclick="showCategory('${category}')"]`).classList.add('active');
+            renderMenu(category);
+        }
+
+        // Initial render of the first category
+        showCategory('beverages');
+    </script>
+</body>
+
+</html>
